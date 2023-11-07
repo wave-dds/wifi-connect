@@ -1,14 +1,20 @@
 import React from 'react';
-import logo from '../img/logo.svg';
-import { Navbar, Provider, Container } from 'rendition';
+import logo from '../img/wavelogo.svg';
+import styled from 'styled-components';
+import { Navbar as OriginalNavbar, Provider, Container } from 'rendition';
 import { NetworkInfoForm } from './NetworkInfoForm';
 import { Notifications } from './Notifications';
 import { createGlobalStyle } from 'styled-components';
 
 const GlobalStyle = createGlobalStyle`
+	@font-face {
+		font-family: 'Avenir';
+		src: url('/static/fonts/Avenir/AvenirLTStd-Roman.otf');
+	}
+
 	body {
 		margin: 0;
-		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+		font-family: 'Avenir', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
 			'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
 			sans-serif;
 		-webkit-font-smoothing: antialiased;
@@ -18,6 +24,18 @@ const GlobalStyle = createGlobalStyle`
 	code {
 		font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 	}
+`;
+
+const Navbar = styled(OriginalNavbar)`
+	background-color: #fff;
+	box-shadow: rgba(33, 35, 38, 0.085) 0px 10px 10px -10px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+`;
+
+const StyledContainer = styled(Container)`
+	font-family: 'Avenir', sans-serif;
 `;
 
 export interface NetworkInfo {
@@ -86,9 +104,17 @@ const App = () => {
 	return (
 		<Provider>
 			<GlobalStyle />
-			<Navbar brand={<img src={logo} style={{ height: 30 }} alt="logo" />} />
+			<Navbar
+				brand={
+					<img
+						src={logo}
+						style={{ height: 30 }}
+						alt="WAVE Drowning Detection Systems"
+					/>
+				}
+			/>
 
-			<Container>
+			<StyledContainer>
 				<Notifications
 					attemptedConnect={attemptedConnect}
 					hasAvailableNetworks={
@@ -101,7 +127,7 @@ const App = () => {
 					availableNetworks={availableNetworks}
 					onSubmit={onConnect}
 				/>
-			</Container>
+			</StyledContainer>
 		</Provider>
 	);
 };

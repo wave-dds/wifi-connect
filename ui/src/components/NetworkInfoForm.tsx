@@ -87,9 +87,14 @@ export const NetworkInfoForm = ({
 			m={4}
 			mt={5}
 		>
-			<Heading.h3 align="center" mb={4}>
+			<Heading.h3
+				align="center"
+				mb={4}
+				style={{ color: 'rgba(0,0,0,0.6)', fontSize: '16px', fontWeight: 500 }}
+			>
 				<Flex flexDirection={['column', 'row']} flexWrap="wrap">
-					Hi! Please choose your WiFi
+					Please select your Wi-Fi from the dropdown and enter the Wi-Fi
+					passphrase to connect your WAVE system.
 					<Button
 						ml={[0, 3]}
 						tertiary
@@ -116,6 +121,13 @@ export const NetworkInfoForm = ({
 					mx: '20%',
 					mt: 3,
 					disabled: availableNetworks.length <= 0,
+					style: {
+						backgroundColor: '#2ad2c9',
+						borderColor: 'white',
+						borderRadius: '4px',
+						fontWeight: 500,
+						fontSize: '16px',
+					},
 				}}
 				submitButtonText={'Connect'}
 			/>

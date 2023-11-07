@@ -1,5 +1,14 @@
 import * as React from 'react';
 import { Txt, Alert } from 'rendition';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBan } from '@fortawesome/free-solid-svg-icons';
+
+const ErrorPrefix = (
+	<React.Fragment>
+		<FontAwesomeIcon icon={faBan} />
+		<Txt.span> Error!</Txt.span>
+	</React.Fragment>
+);
 
 export const Notifications = ({
 	hasAvailableNetworks,
@@ -24,11 +33,11 @@ export const Notifications = ({
 			)}
 			{!hasAvailableNetworks && (
 				<Alert m={2} warning>
-					<Txt.span>No wifi networks available. Click 'Rescan' to search again.</Txt.span>
+					<Txt.span>No Wi-Fi networks available. Click 'Rescan' to search again.</Txt.span>
 				</Alert>
 			)}
 			{!!error && (
-				<Alert m={2} danger>
+				<Alert m={2} danger prefix={ErrorPrefix}>
 					<Txt.span>{error}</Txt.span>
 				</Alert>
 			)}
