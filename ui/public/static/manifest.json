@@ -1,9 +1,9 @@
 {
-  "short_name": "WiFi Connect",
-  "name": "Easy WiFi setup for Linux devices from your mobile phone or laptop",
+  "short_name": "WAVE Wi-Fi Setup",
+  "name": "Easy Wi-Fi setup for your WAVE System from your mobile phone, tablet, or laptop",
   "icons": [
     {
-      "src": "favicon.png",
+      "src": "favicon.svg",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     }
