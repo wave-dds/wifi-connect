@@ -108,7 +108,7 @@ const App = () => {
 				brand={
 					<img
 						src={logo}
-						style={{ height: 30 }}
+						style={{ height: 30, paddingLeft: 25 }}
 						alt="WAVE Drowning Detection Systems"
 					/>
 				}
