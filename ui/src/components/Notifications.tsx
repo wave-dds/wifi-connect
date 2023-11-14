@@ -25,15 +25,19 @@ export const Notifications = ({
 				<Alert m={2} info>
 					<Txt.span>Applying changes... </Txt.span>
 					<Txt.span>
-						Your device will soon be online. If connection is unsuccessful, the
-						Access Point will be back up in a few minutes, and reloading this
-						page will allow you to try again.
+						Your WAVE device is attempting to connect to your Wi-Fi network.
+						Once connected, you will be able to access the device using the WAVE
+						DDS Connect app. If the connection is unsuccessful, the WAVENetwork
+						WiFi will reappear in your phones WiFi list and you can connect to
+						it and try again.
 					</Txt.span>
 				</Alert>
 			)}
 			{!hasAvailableNetworks && (
 				<Alert m={2} warning>
-					<Txt.span>No Wi-Fi networks available. Click 'Rescan' to search again.</Txt.span>
+					<Txt.span>
+						No Wi-Fi networks available. Click 'Rescan' to search again.
+					</Txt.span>
 				</Alert>
 			)}
 			{!!error && (

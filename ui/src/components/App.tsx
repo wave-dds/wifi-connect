@@ -122,6 +122,13 @@ const App = () => {
 					}
 					error={error}
 				/>
+				{!attemptedConnect && (
+					<NetworkInfoForm
+						fetchNetworks={fetchNetworks}
+						availableNetworks={availableNetworks}
+						onSubmit={onConnect}
+					/>
+				)}
 				<NetworkInfoForm
 					fetchNetworks={fetchNetworks}
 					availableNetworks={availableNetworks}
