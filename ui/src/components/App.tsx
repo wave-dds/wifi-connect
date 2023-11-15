@@ -129,11 +129,6 @@ const App = () => {
 						onSubmit={onConnect}
 					/>
 				)}
-				<NetworkInfoForm
-					fetchNetworks={fetchNetworks}
-					availableNetworks={availableNetworks}
-					onSubmit={onConnect}
-				/>
 			</StyledContainer>
 		</Provider>
 	);
