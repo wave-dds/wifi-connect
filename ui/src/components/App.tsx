@@ -40,6 +40,7 @@ const StyledContainer = styled(Container)`
 
 export interface NetworkInfo {
 	ssid?: string;
+	manualSsid?: string;
 	identity?: string;
 	passphrase?: string;
 }
