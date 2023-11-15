@@ -4,18 +4,23 @@ import { Button, Flex, Form, Heading, RenditionUiSchema } from 'rendition';
 import { Network, NetworkInfo } from './App';
 import { RefreshIcon } from './RefreshIcon';
 
-const getSchema = (availableNetworks: Network[]): JSONSchema => ({
+const getSchema = (
+	availableNetworks: Network[],
+	isManualSsid: boolean,
+): JSONSchema => ({
 	type: 'object',
 	properties: {
-		ssid: {
-			title: 'SSID',
-			type: 'string',
-			default: availableNetworks[0]?.ssid,
-			oneOf: availableNetworks.map((network) => ({
-				const: network.ssid,
-				title: network.ssid,
-			})),
-		},
+		ssid: !isManualSsid
+			? {
+					title: 'SSID',
+					type: 'string',
+					default: availableNetworks[0]?.ssid,
+					anyOf: availableNetworks.map((network) => ({
+						const: network.ssid,
+						title: network.ssid,
+					})),
+			  }
+			: { type: 'string', title: '' },
 		manualSsid: {
 			title: 'SSID',
 			type: 'string',
@@ -37,7 +42,6 @@ const getSchema = (availableNetworks: Network[]): JSONSchema => ({
 			default: '',
 		},
 	},
-	required: ['ssid'],
 });
 
 const getUiSchema = (
@@ -149,16 +153,22 @@ export const NetworkInfoForm = ({
 			<Form
 				width={['100%', '80%', '60%', '40%']}
 				onFormChange={({ formData }) => {
-					// is this the flickering?
-					if (formData.manualSsid) {
-						formData.ssid = formData.manualSsid;
-					}
 					setShowIdentity(formData.showIdentity);
 					setData(formData);
 				}}
-				onFormSubmit={({ formData }) => onSubmit(formData)}
+				onFormSubmit={({ formData }) => {
+					if (!formData.ssid && !formData.manualSsid) {
+						alert('Either SSID or Manual SSID is required');
+						return;
+					}
+					const adjustedFormData = {
+						...formData,
+						ssid: isManualSsid ? formData.manualSsid : formData.ssid,
+					};
+					onSubmit(adjustedFormData);
+				}}
 				value={data}
-				schema={getSchema(availableNetworks)}
+				schema={getSchema(availableNetworks, isManualSsid)}
 				uiSchema={getUiSchema(
 					isSelectedNetworkEnterprise,
 					isManualSsid,
@@ -168,7 +178,8 @@ export const NetworkInfoForm = ({
 					width: '60%',
 					mx: '20%',
 					mt: 3,
-					disabled: availableNetworks.length <= 0 && !data.ssid,
+					disabled:
+						availableNetworks.length <= 0 && !data.ssid && !data.manualSsid,
 					style: {
 						backgroundColor: '#2ad2c9',
 						borderColor: 'white',
