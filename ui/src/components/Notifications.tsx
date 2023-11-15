@@ -28,8 +28,7 @@ export const Notifications = ({
 						Your WAVE device is attempting to connect to your Wi-Fi network.
 						Once connected, you will be able to access the device using the WAVE
 						DDS Connect app. If the connection is unsuccessful, the WAVENetwork
-						WiFi will reappear in your phones WiFi list and you can connect to
-						it and try again.
+						WiFi will reappear and you can connect to it and try again.
 					</Txt.span>
 				</Alert>
 			)}
