@@ -127,13 +127,14 @@ export const NetworkInfoForm = ({
 				mb={4}
 				style={{ color: 'rgba(0,0,0,0.6)', fontSize: '16px', fontWeight: 500 }}
 			>
-				<Flex flexDirection={['column', 'row']} flexWrap="wrap">
+				<Flex flexDirection="column" alignItems="center" flexWrap="wrap">
 					{isManualSsid
 						? 'Please enter your Wi-Fi SSID and enter the WiFi passphrase to connect your WAVE system.'
 						: 'Please select your Wi-Fi from the dropdown and enter the Wi-Fi passphrase to connect your WAVE system.'}
 					{!isManualSsid && (
 						<Button
 							ml={[0, 3]}
+							mt="1"
 							tertiary
 							plain
 							icon={<RefreshIcon />}
@@ -142,7 +143,7 @@ export const NetworkInfoForm = ({
 							Rescan
 						</Button>
 					)}
-					<Button ml={[0, 3]} tertiary plain onClick={toggleManualSsid}>
+					<Button ml={[0, 3]} mt="3" tertiary plain onClick={toggleManualSsid}>
 						{isManualSsid
 							? 'Choose Wi-Fi from List'
 							: 'Enter Wi-Fi SSID Manually'}
