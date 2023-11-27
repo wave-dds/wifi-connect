@@ -280,9 +280,9 @@ dependencies = [
 
 [[package]]
 name = "itertools"
-version = "0.8.2"
+version = "0.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f56a2d0bc861f9165be4eb3442afd3c236d8a98afd426f65d92324ae1091a484"
+checksum = "b0fd2260e829bddf4cb6ea802289de2f86d6a7a690192fbe91b3f46e0f2c8473"
 dependencies = [
  "either",
 ]
@@ -804,7 +804,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d0ab3ca65655bb1e41f2a8c8cd662eb4fb035e67c3f78da1d61dffe89d07300f"
 dependencies = [
  "aho-corasick 1.0.2",
- "memchr 2.5.0",
+ "memchr 2.6.4",
  "regex-syntax 0.7.2",
 ]
 
@@ -1190,8 +1190,7 @@ dependencies = [
 [[package]]
 name = "wifiscanner"
 version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d74e667d34abc74f1e5b509ae3d24641f56514ba2c5a64f9d733ae2061aef856"
+source = "git+https://github.com/HuMoran/wifiscanner.git?rev=9d9a8d1#9d9a8d112a816238ea9495bc6dca63e85e4e6bea"
 dependencies = [
  "itertools",
  "regex 1.8.4",
