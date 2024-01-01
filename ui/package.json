@@ -18,6 +18,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "GENERATE_SOURCEMAP=false react-scripts build",
+    "analyze": "source-map-explorer 'build/static/js/*.js'",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "balena-lint src/ && echo \"Done!\""
@@ -42,6 +43,7 @@
     "@balena/lint": "^5.0.2",
     "@types/json-schema": "^7.0.5",
     "husky": "^4.2.3",
-    "lint-staged": "^10.0.9"
+    "lint-staged": "^10.0.9",
+    "source-map-explorer": "^2.5.3"
   }
 }
