@@ -2,6 +2,8 @@ use std::error::Error as StdError;
 use std::fmt;
 use std::net::Ipv4Addr;
 use std::sync::mpsc::{Receiver, Sender};
+use std::fs::File;
+use std::io::Read;
 
 use iron::modifiers::Redirect;
 use iron::prelude::*;
@@ -30,6 +32,61 @@ struct RequestSharedState {
 
 impl typemap::Key for RequestSharedState {
     type Value = RequestSharedState;
+}
+
+struct CompressionMiddleware {
+    ui_directory: PathBuf,
+}
+
+impl CompressionMiddleware {
+    fn new(ui_directory: PathBuf) -> Self {
+        Self { ui_directory }
+    }
+}
+
+impl AfterMiddleware for CompressionMiddleware {
+    fn after(&self, req: &mut Request, res: Response) -> IronResult<Response> {
+        if let Some(encoding) = req.headers.get::<headers::AcceptEncoding>() {
+            let mut path = self.ui_directory.clone();
+            path.push(req.url.path().join("/"));
+            let mut content_encoding = None;
+
+            for quality_item in encoding.iter() {
+                println!("{:?}", quality_item.item);
+                match &quality_item.item {
+                    &headers::Encoding::EncodingExt(ref s) if s == "br" => {
+                        let new_file_name = format!("{}.br", path.file_name().unwrap().to_str().unwrap());
+                        path.set_file_name(new_file_name);
+                        content_encoding = Some("br");
+                        break;
+                    }
+                    &headers::Encoding::Gzip => {
+                        let new_file_name = format!("{}.gz", path.file_name().unwrap().to_str().unwrap());
+                        path.set_file_name(new_file_name);
+                        content_encoding = Some("gzip");
+                        break;
+                    }
+                    _ => {}
+                }
+            }
+
+            println!("Path: {:?}", path); // Log the path
+            if path.exists() {
+                println!("Serving static file: {:?}", path);
+                let mut file = File::open(&path).unwrap();
+                let mut contents = Vec::new();
+                file.read_to_end(&mut contents).unwrap();
+
+                let mut response = Response::with((status::Ok, contents));
+                if let Some(encoding) = content_encoding {
+                    response.headers.set(headers::ContentEncoding(vec![iron::headers::Encoding::EncodingExt(encoding.to_string())]));
+                }
+                return Ok(response);
+            }
+        }
+
+        Ok(res)
+    }
 }
 
 #[derive(Debug)]
@@ -165,6 +222,7 @@ pub fn start_server(
     let mut chain = Chain::new(assets);
     chain.link(Write::<RequestSharedState>::both(request_state));
     chain.link_after(RedirectMiddleware);
+    chain.link_after(CompressionMiddleware::new(ui_directory.clone()));
     chain.link_around(cors_middleware);
 
     let address = format!("{}:{}", gateway_clone, listening_port);
