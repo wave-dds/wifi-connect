@@ -38,6 +38,14 @@ const StyledContainer = styled(Container)`
 	font-family: 'Avenir', sans-serif;
 `;
 
+// rendition exports a Theme type, but Provider accepts a PartialDeep<Theme>.
+// We shouldn't need to import PartialDeep from rendition's lodash just to conform.
+// Instead, introspect the type from the Provider signature.
+const renditionTheme: Parameters<typeof Provider>[0]['theme'] = {
+	font: 'Helvetica, sans-serif',
+	monospace: "'Courier New', monospace",
+};
+
 export interface NetworkInfo {
 	ssid?: string;
 	manualSsid?: string;
@@ -103,7 +111,7 @@ const App = () => {
 	};
 
 	return (
-		<Provider>
+		<Provider theme={renditionTheme}>
 			<GlobalStyle />
 			<Navbar
 				brand={
