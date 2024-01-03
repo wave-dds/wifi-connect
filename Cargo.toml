@@ -7,6 +7,7 @@ description = "Easy WiFi setup for Linux devices from your mobile phone or lapto
 [dependencies]
 network-manager = { git = "https://github.com/balena-io-modules/network-manager.git" }
 clap = "2.24"
+include_dir = "0.7.3"
 iron = "0.6"
 iron-cors = "0.8"
 staticfile = "0.5"
@@ -21,6 +22,7 @@ log = "0.3"
 env_logger = "0.4"
 nix = "0.25"
 wifiscanner = { git = "https://github.com/HuMoran/wifiscanner.git", rev = "9d9a8d1" }
+mime_guess = "2.0.5"
 
 [dependencies.error-chain]
 version = "0.12"

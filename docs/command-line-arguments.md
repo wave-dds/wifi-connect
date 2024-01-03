@@ -53,9 +53,3 @@ Command line options have environment variable counterpart. If both a command li
     Exit if no activity for the specified timeout (seconds)
 
     Default: _0 - no timeout_
-
-*   **-u, --ui-directory** ui_directory, **$UI_DIRECTORY**
-
-    Web UI directory location
-
-    Default: _ui_

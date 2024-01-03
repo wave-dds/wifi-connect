@@ -2,26 +2,28 @@ use std::error::Error as StdError;
 use std::fmt;
 use std::net::Ipv4Addr;
 use std::sync::mpsc::{Receiver, Sender};
-use std::fs::File;
-use std::io::Read;
 
 use iron::modifiers::Redirect;
 use iron::prelude::*;
 use iron::{
     headers, status, typemap, AfterMiddleware, Iron, IronError, IronResult, Request, Response, Url,
 };
+use iron::mime::{Mime, SubLevel, TopLevel};
 use iron_cors::CorsMiddleware;
-use mount::Mount;
 use params::{FromValue, Params};
-use path::PathBuf;
 use persistent::Write;
 use router::Router;
 use serde_json;
-use staticfile::Static;
 
 use errors::*;
 use exit::{exit, ExitResult};
 use network::{NetworkCommand, NetworkCommandResponse};
+extern crate mime_guess;
+use self::mime_guess::from_path;
+
+extern crate include_dir;
+use self::include_dir::{include_dir, Dir};
+const UI_DIR: Dir = include_dir!("ui/build");
 
 struct RequestSharedState {
     gateway: Ipv4Addr,
@@ -35,24 +37,34 @@ impl typemap::Key for RequestSharedState {
 }
 
 struct CompressionMiddleware {
-    ui_directory: PathBuf,
+    ui: Dir<'static>,
 }
 
 impl CompressionMiddleware {
-    fn new(ui_directory: PathBuf) -> Self {
-        Self { ui_directory }
+    fn new(ui: Dir<'static>) -> Self {
+        Self { ui }
     }
 }
 
 impl AfterMiddleware for CompressionMiddleware {
     fn after(&self, req: &mut Request, res: Response) -> IronResult<Response> {
         if let Some(encoding) = req.headers.get::<headers::AcceptEncoding>() {
-            let mut path = self.ui_directory.clone();
-            path.push(req.url.path().join("/"));
+            let mut path = std::path::PathBuf::from(req.url.path().join("/"));
+            if path.as_os_str().is_empty() {
+                path.set_file_name("index.html");
+            }
             let mut content_encoding = None;
+            // Set the Content-Type header based on the file extension
+            let mime_type = match path.extension().and_then(std::ffi::OsStr::to_str) {
+                Some("html") => Mime(TopLevel::Text, SubLevel::Html, vec![]),
+                Some("js") => Mime(TopLevel::Application, SubLevel::Javascript, vec![]),
+                Some("css") => Mime(TopLevel::Text, SubLevel::Css, vec![]),
+                Some("png") => Mime(TopLevel::Image, SubLevel::Png, vec![]),
+                Some("json") => Mime(TopLevel::Application, SubLevel::Json, vec![]),
+                _ => Mime(TopLevel::Text, SubLevel::Plain, vec![]),
+            };
 
             for quality_item in encoding.iter() {
-                println!("{:?}", quality_item.item);
                 match &quality_item.item {
                     &headers::Encoding::EncodingExt(ref s) if s == "br" => {
                         let new_file_name = format!("{}.br", path.file_name().unwrap().to_str().unwrap());
@@ -71,13 +83,11 @@ impl AfterMiddleware for CompressionMiddleware {
             }
 
             println!("Path: {:?}", path); // Log the path
-            if path.exists() {
-                println!("Serving static file: {:?}", path);
-                let mut file = File::open(&path).unwrap();
-                let mut contents = Vec::new();
-                file.read_to_end(&mut contents).unwrap();
+            if let Some(file) = self.ui.get_file(&path) {
+                println!("Serving compressed file: {:?}", path);
+                let mut response = Response::with((status::Ok, file.contents().to_vec()));
 
-                let mut response = Response::with((status::Ok, contents));
+                response.headers.set(headers::ContentType(mime_type));
                 if let Some(encoding) = content_encoding {
                     response.headers.set(headers::ContentEncoding(vec![iron::headers::Encoding::EncodingExt(encoding.to_string())]));
                 }
@@ -188,13 +198,37 @@ impl AfterMiddleware for RedirectMiddleware {
     }
 }
 
+struct IncludeDirHandler {
+    dir: Dir<'static>,
+}
+
+impl IncludeDirHandler {
+    fn new(dir: Dir<'static>) -> Self {
+        Self { dir }
+    }
+}
+
+impl iron::Handler for IncludeDirHandler {
+    fn handle(&self, req: &mut Request) -> IronResult<Response> {
+        let path = req.url.path().join("/");
+        if let Some(file) = self.dir.get_file(&path) {
+            let mime_guess = from_path(&path).first_or_octet_stream();
+            let mime_type = mime_guess.as_ref().parse::<Mime>().unwrap();
+            let mut response = Response::with((status::Ok, file.contents().to_vec()));
+            response.headers.set(headers::ContentType(mime_type));
+            Ok(response)
+        } else {
+            Ok(Response::with(status::NotFound))
+        }
+    }
+}
+
 pub fn start_server(
     gateway: Ipv4Addr,
     listening_port: u16,
     server_rx: Receiver<NetworkCommandResponse>,
     network_tx: Sender<NetworkCommand>,
     exit_tx: Sender<ExitResult>,
-    ui_directory: &PathBuf,
 ) {
     let exit_tx_clone = exit_tx.clone();
     let gateway_clone = gateway;
@@ -206,23 +240,17 @@ pub fn start_server(
     };
 
     let mut router = Router::new();
-    router.get("/", Static::new(ui_directory), "index");
+    router.get("/", IncludeDirHandler::new(UI_DIR.clone()), "index");
     router.get("/networks", networks, "networks");
     router.post("/connect", connect, "connect");
-
-    let mut assets = Mount::new();
-    assets.mount("/", router);
-    assets.mount("/static", Static::new(ui_directory.join("static")));
-    assets.mount("/css", Static::new(ui_directory.join("css")));
-    assets.mount("/img", Static::new(ui_directory.join("img")));
-    assets.mount("/js", Static::new(ui_directory.join("js")));
+    router.get("/*", IncludeDirHandler::new(UI_DIR.clone()), "static_files");
 
     let cors_middleware = CorsMiddleware::with_allow_any();
 
-    let mut chain = Chain::new(assets);
+    let mut chain = Chain::new(router);
     chain.link(Write::<RequestSharedState>::both(request_state));
     chain.link_after(RedirectMiddleware);
-    chain.link_after(CompressionMiddleware::new(ui_directory.clone()));
+    chain.link_after(CompressionMiddleware::new(UI_DIR));
     chain.link_around(cors_middleware);
 
     let address = format!("{}:{}", gateway_clone, listening_port);

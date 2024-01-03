@@ -99,7 +99,6 @@ impl NetworkCommandHandler {
         let gateway = config.gateway;
         let listening_port = config.listening_port;
         let exit_tx_server = exit_tx.clone();
-        let ui_directory = config.ui_directory.clone();
 
         thread::spawn(move || {
             start_server(
@@ -108,7 +107,6 @@ impl NetworkCommandHandler {
                 server_rx,
                 network_tx,
                 exit_tx_server,
-                &ui_directory,
             );
         });
     }

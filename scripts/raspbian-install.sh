@@ -12,7 +12,6 @@ SCRIPT='raspbian-install.sh'
 NAME='WiFi Connect Raspbian Installer'
 
 INSTALL_BIN_DIR="$WFC_INSTALL_ROOT/sbin"
-INSTALL_UI_DIR="$WFC_INSTALL_ROOT/share/wifi-connect/ui"
 
 RELEASE_URL="https://api.github.com/repos/$WFC_REPO/releases/45509064"
 
@@ -175,12 +174,6 @@ install_wfc() {
     ensure curl -Ls "$_arch_url" | tar -xz -C "$_download_dir"
 
     ensure sudo mv "$_download_dir/wifi-connect" $INSTALL_BIN_DIR
-
-    ensure sudo mkdir -p $INSTALL_UI_DIR
-
-    ensure sudo rm -rdf $INSTALL_UI_DIR
-
-    ensure sudo mv "$_download_dir/ui" $INSTALL_UI_DIR
 
     ensure rm -rdf "$_download_dir"
 
