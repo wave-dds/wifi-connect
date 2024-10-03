@@ -1,0 +1,22 @@
+#!/sbin/openrc-run
+
+# /etc/init.d/wifi_connect_watcher
+
+# Define the script's description
+description="Wifi-Connect Watcher for .wifi_connect_mode"
+
+# Path to the watcher script
+command="/usr/local/sbin/wifi-connect-watcher.sh"
+command_background=true
+pidfile="/var/run/wifi-connect-watcher.pid"
+name="WiFi Connect Watcher"
+
+depend() {
+    # Declare dependencies (if any)
+    need net
+}
+
+start_pre() {
+    # Ensure the wifi_connect_watcher.sh is executable
+    chmod +x /usr/local/sbin/wifi-connect-watcher.sh
+}
