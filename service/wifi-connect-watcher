@@ -9,7 +9,7 @@ description="Wifi-Connect Watcher for .wifi_connect_mode"
 command="/usr/local/sbin/wifi-connect-watcher.sh"
 command_background=true
 pidfile="/var/run/wifi-connect-watcher.pid"
-name="WiFi Connect Watcher"
+name="wifi-connect-watcher"
 
 depend() {
     # Declare dependencies (if any)
@@ -19,4 +19,19 @@ depend() {
 start_pre() {
     # Ensure the wifi_connect_watcher.sh is executable
     chmod +x /usr/local/sbin/wifi-connect-watcher.sh
+    mkdir -p /var/run/wifi-connect-watcher
+    echo "normal_mode" > /var/run/wifi-connect-watcher/request
+    echo "normal_mode" > /var/run/wifi-connect-watcher/status
+}
+
+start() {
+    ebegin "Starting ${name}"
+    supervise-daemon ${name} --start --pidfile ${pidfile} --respawn-delay 15 -- ${command}
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping ${name}"
+    supervise-daemon ${name} --stop --pidfile ${pidfile}
+    eend $?
 }
