@@ -7,7 +7,6 @@ request_file="/var/run/wifi-connect-watcher/request"
 # If wifi-connect shuts itself down, and the eval shell is still alive, it will return the status to normal
 wifi_connect_cmd="sudo DBUS_SYSTEM_BUS_ADDRESS=unix:path=/var/run/dbus/system_bus_socket /usr/local/sbin/wifi-connect -s WAVENetwork -p SaferSwimming -o 4000; echo 'normal_mode' | sudo tee $status_file"
 inotify_pid_file="/tmp/inotifywait_wifi_connect_watcher.pid"
-wifi_connect_shell_pid_file="/tmp/wifi_connect.pid"
 
 # create folder and files if they don't exist
 if [ ! -d "$(dirname "$status_file")" ]; then
@@ -28,19 +27,12 @@ handle_request() {
         "connect_mode")
             logger "going to connect mode"
             eval $wifi_connect_cmd &
-            echo $! > "$wifi_connect_shell_pid_file"
             echo "connect_mode" > "$status_file"
             ;;
         "normal_mode")
             logger "going to normal mode"
-            if [ -f "$wifi_connect_shell_pid_file" ]; then
-                wifi_connect_shell_pid=$(cat "$wifi_connect_shell_pid_file")
-                sudo kill -$wifi_connect_shell_pid
-                # If the shell is killed, it can't return the status to normal
-                echo "normal_mode" > "$status_file"
-                rm -f "$wifi_connect_shell_pid_file"
-                logger "Killed wifi-connect process."
-            fi
+            sudo pkill -TERM /usr/local/sbin/wifi-connect
+            logger "Killed wifi-connect process."
             echo "normal_mode" > "$status_file"
             ;;
         *)
