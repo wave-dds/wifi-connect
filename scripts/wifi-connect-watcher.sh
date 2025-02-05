@@ -75,5 +75,10 @@ while true; do
     inotifywait -e modify "$request_file" &
     echo $! > "$inotify_pid_file"
     wait $!
-    handle_request
+    exit_status=$?
+    if [ $exit_status -eq 0 ]; then
+        handle_request
+    else
+        logger "inotifywait was terminated with status $exit_status"
+    fi
 done
